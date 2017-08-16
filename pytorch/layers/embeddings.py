@@ -21,6 +21,7 @@ class Embedding(nn.Module):
         if self.char_embedding:                        
             self.char_embed_size = char_embed_size
             
+            # number of total convolutional filters
             self.char_vec_dim = n_channel * len(kernel_sizes)
             
             self.embed_size = self.word_embed_size + self.char_vec_dim
@@ -110,12 +111,12 @@ class Embedding(nn.Module):
         
         1) Apply Word embedding => word_embed_size
         2) Apply Character embedding (+prefix/suffix & padding up to max_word_len) => char_embed_size
-        3) Apply Char-CNN on Character embedding => char_vec_size (= number of convolutional filters due to max pooling)
-        4) Concatenate [Word embedding; CNN outputs] => word_embed_size + char_embed_size
-        5) Apply 2-layer Highway networks => word_embed_size + char_embed_size = embed_size
-        6) Apply Positional Encoding (not concatenation)
+        3) Apply Char-CNN on Character embedding => number of convolutional filters
+        4) Concatenate [Word embedding; CNN outputs] => word_embed_size + n_filters
+        5) Apply 2-layer Highway networks => word_embed_size + n_channels = embed_size
+        6) Apply positional encoding and add to word vector
         
-        Final embedding size = word_embed_size + char_embed_size
+        Final word vector dimension = word_embed_size + n_filters
         
         Args:
             word_indices: [batch_size, max_seq_len]
