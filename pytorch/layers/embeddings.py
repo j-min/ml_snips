@@ -27,14 +27,6 @@ class Embedding(nn.Module):
             
             self.char_embedding = nn.Embedding(char_vocab_size, self.char_embed_size)
 
-            # n_channel: number of channel duplicates per kernel size
-            # ex) n_channel = 4, kernel_sizes= [3,4,5]
-            #
-            # Total 12 channals
-            # = n_channel * len(kernel_sizes)
-            # = 4 x 3-width kernel + 4 x 4-width kernel + 4 x 5-width kernel
-            # = word vector dimension from character embedding
-
             self.char_cnn = nn.ModuleList([nn.Conv2d(1, n_channel, [width, self.char_embed_size]) for width in kernel_sizes])
 
             # 2-layer Highway Networks
@@ -79,7 +71,7 @@ class Embedding(nn.Module):
             # [batch_size * max_seq_len, n_channel, len_after_conv, 1]
             char_vectors = char_cnn(char_vectors)
             
-            # [batch_size * max_seq_len, n_channel, len_after_conv, 1]
+            # [batch_size * max_seq_len, n_channel, len_after_conv]
             char_vectors = char_vectors.squeeze(-1)
             
             # [batch_size * max_seq_len, n_channel]
@@ -91,6 +83,7 @@ class Embedding(nn.Module):
         word_vector = torch.cat(word_vectors, dim=-1)
         
         # [batch_size, max_seq_len, n_channel * len(kernel_sizes)]
+        # char_vec_dim = n_channel * len(kernel_sizes)
         word_vector = word_vector.view(batch_size, max_seq_len, -1)
 
         return word_vector
@@ -103,7 +96,7 @@ class Embedding(nn.Module):
         div_term = torch.pow(10000, torch.arange(0, embed_size * 2, 2) / embed_size)
         
         # [max_seq_len, embed_size]
-        pe = pe / div_term
+        pe /= div_term
         
         pe[:, 0::2] = torch.sin(pe[:, 0::2])
         pe[:, 1::2] = torch.cos(pe[:, 1::2])
