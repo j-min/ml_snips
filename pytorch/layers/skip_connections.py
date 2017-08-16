@@ -2,7 +2,7 @@ from torch import nn
 from torch.nn import functional as F
 
 class Highway(nn.Module):
-    def __init__(self, size, num_layers, f):
+    def __init__(self, size, num_layers, f=None):
 
         super(Highway, self).__init__()
 
@@ -12,7 +12,10 @@ class Highway(nn.Module):
         
         self.gate = nn.ModuleList([nn.Linear(size, size) for _ in range(num_layers)])
 
-        self.f = f
+        if f:
+            self.f = f
+        else:
+            self.f = nn.ReLU()
 
     def forward(self, x):
         """
