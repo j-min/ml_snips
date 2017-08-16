@@ -113,6 +113,7 @@ class Embedding(nn.Module):
         3) Apply Char-CNN on Character embedding => char_vec_size (= number of convolutional filters due to max pooling)
         4) Concatenate [Word embedding; CNN outputs] => word_embed_size + char_embed_size
         5) Apply 2-layer Highway networks => word_embed_size + char_embed_size = embed_size
+        6) Apply Positional Encoding (not concatenation)
         
         Final embedding size = word_embed_size + char_embed_size
         
