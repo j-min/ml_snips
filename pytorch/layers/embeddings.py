@@ -89,6 +89,7 @@ class Embedding(nn.Module):
         return word_vector
         
     def make_positional_encoding(self, embed_size, max_seq_len):
+        """ 'Attention-is-all-you-need' style positional encoding. """
         # [max_seq_len, embed_size]
         pe = torch.arange(0, max_seq_len).unsqueeze(1).expand(max_seq_len, embed_size)
         
@@ -103,22 +104,31 @@ class Embedding(nn.Module):
         
         return pe
 
-    def forward(self, word_indices, char_indices):
+    def forward(self, word_indices, char_indices=None):
         """
+        Apply Word-level (+ Character-level / postional) Embedding
+        
+        1) Apply Word embedding => word_embed_size
+        2) Apply Character embedding (+prefix/suffix & padding up to max_word_len) => char_embed_size
+        3) Apply Char-CNN on Character embedding => char_vec_size (= number of convolutional filters due to max pooling)
+        4) Concatenate [Word embedding; CNN outputs] => word_embed_size + char_embed_size
+        5) Apply 2-layer Highway networks => word_embed_size + char_embed_size = embed_size
+        
+        Final embedding size = word_embed_size + char_embed_size
+        
         Args:
             word_indices: [batch_size, max_seq_len]
             char_indices: [batch_size, max_seq_len, max_word_len]
         Return:
             word vectors: [batch_size, max_seq_len, embed_size]
-        """
-
-        assert word_indices.size()[:2] == char_indices.size()[:2], \
+        """ 
+        batch_size, max_seq_len = word_indices.size()
+        
+        if self.char_embedding:
+            assert word_indices.size() == char_indices.size()[:2], \
             'Word indices and character indices must have the same sizes, but {} and {} found'.format(
                 word_indices.size(), char_indices.size())
-
-        batch_size, max_seq_len, max_word_len = char_indices.size()
             
-        if self.char_embedding:
             # [batch_size * max_seq_len, word_embed_size]
             word_vector = self.word_embed(word_indices)
             
