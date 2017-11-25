@@ -11,3 +11,32 @@ def reverse_order(tensor, dim=0):
     elif isinstance(tensor, Variable):
         tensor.data = reverse_order(tensor.data, dim=dim)
         return tensor
+    
+def reverse_order_valid(tensor, length_list, dim=0):
+    """
+    Reverse Tensor of Variable only in given length
+    Ex)
+    Args:
+        - tensor (Tensor or Variable)
+         1   2   3   4   5   6
+         6   7   8   9   0   0
+        11  12  13   0   0   0
+        16  17   0   0   0   0
+        21  22  23  24  25  26
+
+        - length_list (list)
+        [6, 4, 3, 2, 6]
+        
+    Return
+        tensor (Tensor or Variable; in-place)
+         6   5   4   3   2   1
+         0   0   9   8   7   6
+         0   0   0  13  12  11
+         0   0   0   0  17  16
+        26  25  24  23  22  21
+    """
+    for row, length in zip(tensor, length_list):
+        valid_row = row[:length]
+        reversed_valid_row = reverse_order(valid_row, dim=dim)
+        row[:length] = reversed_valid_row
+    return tensor
