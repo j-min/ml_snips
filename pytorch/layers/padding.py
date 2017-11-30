@@ -5,7 +5,7 @@ import torch.nn.functional as F
 class SamePad2d(nn.Module):
     def __init__(self, kernel_size, stride, value=0):
         """"SAME-Padding Wrapper for PyTorch"""
-        super().__init__()
+        super(SamePad2d, self).__init__()
 
         if type(kernel_size) == int:
             self.kernel_width = kernel_size
